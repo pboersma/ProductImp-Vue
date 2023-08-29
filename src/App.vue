@@ -12,6 +12,7 @@ import ProductsPage from '@/components/pages/ProductsPage.vue'
 import LoadingPage from '@/components/pages/LoadingPage.vue'
 
 import MappingDialog from '@/components/dialogs/MappingDialog.vue'
+import CreateDatasource from '@/components/dialogs/Datasource/CreateDatasource.vue'
 
 // Store
 import { useNavigationStore } from '@/stores/navigation'
@@ -30,7 +31,8 @@ const mapPageComponents: any = {
 }
 
 const mapDialogComponents: any = {
-  MappingDialog: MappingDialog
+  MappingDialog: MappingDialog,
+  CreateDatasource: CreateDatasource
 }
 
 onMounted(async () => {

@@ -10,40 +10,51 @@ interface AxiosCustomResponseData {
     status: number
 }
 
+/**
+ * Fetches all the datasources from the API.
+ *
+ * @returns { Promise<any> }
+ */
 export const getDatasources = async (): Promise<any> => {
     return await axios.get(`/api-configurations`)
         .then((response: AxiosCustomResponse) => {
-            return response.data;
+            return response
         })
         .catch(error => {
             throw error
         });
-};
-
-export const syncDatasource = async (id: any): Promise<any> => {
-    return await axios.post(`/productimp/v1/synchronize`, {
-        resource: 'DataSource',
-        id: id
-    })
-        .then((response: AxiosCustomResponse) => {
-            return response.data;
-        })
-        .catch(error => {
-            throw error
-        });
-};
+}
 
 /**
- * Delete the datasource.
+ * Delete the datasource through the API.
  *
  * @param { number } id - Resource Identifier 
  *
- * @returns 
+ * @returns { Promise<any> }
  */
 export const deleteDatasource = async (id: number): Promise<any> => {
-    return await axios.delete(`/api-configurations/${id}`).then(( response: AxiosCustomResponse ) => {
-        return response.data;
-    }).catch(error => {
+    return await axios.delete(`/api-configurations/${id}`)
+    .then(( response: AxiosCustomResponse ) => {
+        return response
+    })
+    .catch(error => {
+        throw error
+    })
+}
+
+/**
+ * Create a new datasource through the API.
+ *
+ * @param { any } payload - Payload
+ *
+ * @returns { Promise<any> }
+ */
+export const createDatasource = async(payload: any): Promise<any> => {
+    return await axios.post('api-configurations', payload)
+    .then(( response: AxiosCustomResponse ) => {
+        return response
+    })
+    .catch(error => {
         throw error
     })
 }
