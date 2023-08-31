@@ -1,6 +1,20 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
-import axios from 'axios';
+import axios from 'axios'
+
+import dayjs from 'dayjs'
+import * as RelativeTime from 'dayjs/plugin/relativeTime'
+import * as Timezone from 'dayjs/plugin/timezone'
+import * as utc from 'dayjs/plugin/utc'
+
+dayjs.extend(RelativeTime)
+dayjs.extend(Timezone)
+dayjs.extend(utc)
+
+dayjs.tz.setDefault('Europe/Amsterdam')
+// dayjs.extend(utc)
+// dayjs.extend(Timezone)
+// dayjs.tz.setDefault("Europe/Amsterdam")
 
 import App from './App.vue'
 

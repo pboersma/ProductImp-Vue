@@ -1,38 +1,34 @@
-import type { AxiosResponse } from 'axios'
-import axios from "axios";
-
-// TODO: Move to Interface Files?
-interface AxiosCustomResponse extends AxiosResponse {
-    data: AxiosCustomResponseData
-}
-
-interface AxiosCustomResponseData {
-    status: number
-}
+import axios from "axios"
+import { type AxiosCustomResponse  } from "@/interfaces/axios.interfaces"
+import { type DatasourceInterface } from '@/interfaces/datasource.interfaces'
 
 /**
- * Fetches all the datasources from the API.
+ * Get a list of datasources.
  *
- * @returns { Promise<any> }
+ * @returns { Promise<AxiosCustomResponse> } The response containing the list of datasources.
+ *
+ * @throws { Error } If an error occurs while fetching the datasources.
  */
-export const getDatasources = async (): Promise<any> => {
+const getDatasources = async (): Promise<any> => {
     return await axios.get(`/api-configurations`)
         .then((response: AxiosCustomResponse) => {
             return response
         })
         .catch(error => {
             throw error
-        });
+        })
 }
 
 /**
- * Delete the datasource through the API.
+ * Delete a datasource using its ID.
  *
- * @param { number } id - Resource Identifier 
+ * @param { number } id - The ID of the datasource to delete.
  *
- * @returns { Promise<any> }
+ * @returns { Promise<AxiosCustomResponse> } The response from the delete request.
+ *
+ * @throws { Error } If an error occurs during the delete process.
  */
-export const deleteDatasource = async (id: number): Promise<any> => {
+const deleteDatasource = async (id: number): Promise<AxiosCustomResponse> => {
     return await axios.delete(`/api-configurations/${id}`)
     .then(( response: AxiosCustomResponse ) => {
         return response
@@ -43,13 +39,15 @@ export const deleteDatasource = async (id: number): Promise<any> => {
 }
 
 /**
- * Create a new datasource through the API.
+ * Create a new datasource with the provided payload.
  *
- * @param { any } payload - Payload
+ * @param { DatasourceInterface } payload - The data to create the datasource.
  *
- * @returns { Promise<any> }
+ * @returns { Promise<AxiosCustomResponse> } The response from the create request.
+ *
+ * @throws { Error } If an error occurs during the create process.
  */
-export const createDatasource = async(payload: any): Promise<any> => {
+const createDatasource = async(payload: DatasourceInterface): Promise<AxiosCustomResponse> => {
     return await axios.post('api-configurations', payload)
     .then(( response: AxiosCustomResponse ) => {
         return response
@@ -57,4 +55,30 @@ export const createDatasource = async(payload: any): Promise<any> => {
     .catch(error => {
         throw error
     })
+}
+
+/**
+ * Synchronize a datasource using its ID.
+ *
+ * @param { number } id - The ID of the datasource to synchronize.
+ * 
+ * @returns { Promise<AxiosCustomResponse> } The response from the synchronization request.
+ * 
+ * @throws { Error } If an error occurs during the synchronization process.
+ */
+const syncDatasource = async(id: number): Promise<AxiosCustomResponse> => {
+    return await axios.post(`/api-configurations/sync/${id}`)
+    .then(( response: AxiosCustomResponse ) => {
+        return response
+    })
+    .catch(error => {
+        throw error
+    })
+}
+
+export {
+    createDatasource,
+    deleteDatasource,
+    syncDatasource,
+    getDatasources,
 }

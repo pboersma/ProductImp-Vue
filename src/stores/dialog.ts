@@ -9,7 +9,7 @@ export const useDialogStore = defineStore('dialog', () => {
     const setDialog = async (dialog: any, data: any) => {
         currentDialog.value = dialog
         dialogData.value = data
-        isDialogOpen.value = true;
+        isDialogOpen.value = true
     }
 
     const closeDialog = async () => {

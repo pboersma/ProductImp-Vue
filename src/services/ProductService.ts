@@ -1,21 +1,12 @@
-import type { AxiosResponse } from 'axios'
-import axios from "axios";
+import type { AxiosCustomResponse } from '@/interfaces/axios.interfaces'
+import axios from "axios"
 
-// TODO: Move to Interface Files?
-interface AxiosCustomResponse extends AxiosResponse {
-    data: AxiosCustomResponseData
-}
-
-interface AxiosCustomResponseData {
-    status: number
-}
-
-export const getProducts = async (): Promise<any> => {
-    return await axios.get(`/productimp/v1/products`)
+export const getProducts = async (page: number = 1, limit: number = 10, query: string = ''): Promise<any> => {
+    return await axios.get(`/api-products?page=${page}&limit=${limit}&query=${query}`)
         .then((response: AxiosCustomResponse) => {
-            return response.data;
+            return response
         })
         .catch(error => {
             throw error
-        });
-};
+        })
+}

@@ -51,7 +51,7 @@ const sync = async (id: any) => {
   }).then(async (result) => {
     /* Read more about isConfirmed, isDenied below */
     if (result.isConfirmed) {
-      await datasource.sync(id)
+      await datasource.syncItem(id)
       await Swal.fire('Synced!', '', 'success')
     }
   })

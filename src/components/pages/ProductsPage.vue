@@ -1,45 +1,47 @@
 <script setup lang="ts">
-// @ts-nocheck
-import { ref, reactive, onMounted } from 'vue'
-import { VDataTable } from 'vuetify/labs/VDataTable'
-import Swal from 'sweetalert2'
-
+import { ref, reactive, onMounted, watch } from 'vue'
+import * as dayjs from 'dayjs'
 import LoadingPage from '@/components/pages/LoadingPage.vue'
 
 // Store
 import { useProductStore } from '@/stores/product'
-import { useMappingStore } from '@/stores/mapping'
-import { useWoocommerceStore } from '@/stores/woocommerce'
 import { useDialogStore } from '@/stores/dialog'
 
 const productStore = useProductStore()
 const dialogStore = useDialogStore()
-const mappingStore = useMappingStore()
-const wooCommerceStore = useWoocommerceStore()
 
-const products = ref()
+// Loading
+const loading = ref(true)
 
-// Datatable
-const itemsPerPage = ref(10)
-const search = ref('')
-const expanded = ref([])
+// Pagination & Searching
+const page = ref(1)
+const limit = ref(10)
+const query = ref('')
+
+watch(limit, async () => {
+  await refetch()
+})
+
+const search = () => {
+  // Reset the page.
+  page.value = 1
+
+  refetch()
+}
+
+const refetch = async () => {
+  await productStore.fetchAll(page.value, limit.value, query.value)
+}
+
+// Table
 const headers = reactive([
   {
-    title: '',
-    sortable: false,
-    key: 'data-table-expand'
-  },
-  {
-    title: 'Product',
+    title: 'Name',
     key: 'name'
   },
   {
-    title: 'Mapped',
-    key: 'mapped'
-  },
-  {
-    title: 'Synced',
-    key: 'synced'
+    title: 'Last update',
+    key: 'updatedDate'
   },
   {
     title: 'Actions',
@@ -48,125 +50,81 @@ const headers = reactive([
   }
 ])
 
-// General
-const loading = ref(true)
-
-const checkStatus = (item: any) => {
-  if(!item.mapped) {
-    return true;
-  }
-  
-  if(item.synced) {
-    return true;
-  }
-
-  return false;
-}
-
-const save = async (id: any) => {
-  await Swal.fire({
-  title: 'Do you want to sync this product to WooCommerce?',
-  showCancelButton: true,
-  confirmButtonText: 'Yes, sync it!',
-}).then(async (result) => {
-  /* Read more about isConfirmed, isDenied below */
-  if (result.isConfirmed) {
-    await wooCommerceStore.save(id)
-    await Swal.fire('Synced!', '', 'success')
-  }
-})
-}
-
 onMounted(async () => {
-  await productStore.fetchAll()
-  await mappingStore.fetchAll()
-  await wooCommerceStore.fetchAll()
-
-  if (productStore.products) {
-    if (mappingStore.mappings || wooCommerceStore.woocommerceProducts) {
-      products.value = productStore.products.map((item: any) => {
-        const mapping = mappingStore.mappings.find((mapping: any) => mapping.product_id === item.id)
-        const woocommerce = wooCommerceStore.woocommerceProducts.find((woocommerce: any) => woocommerce.product_id === item.id)
-
-        let mutatedItem = { ...item}
-
-        if (mapping) {
-          mutatedItem = { ...mutatedItem, mapping: JSON.parse(mapping.map), mapped: true }
-        }
-
-        if(woocommerce) {
-          mutatedItem = { ...mutatedItem, synced: true }
-        }
-
-        return mutatedItem
-      })
-    }
-  }
-
+  await refetch()
   loading.value = false
 })
 </script>
 <template>
-  <v-card v-if="!loading">
-    <v-card-title>
-      <v-text-field v-model="search" label="Search" single-line hide-details></v-text-field>
-    </v-card-title>
-    <v-data-table
-      v-model:expanded="expanded"
-      v-model:items-per-page="itemsPerPage"
-      dense
-      :headers="headers"
-      :items="products"
-      item-value="name"
-      :search="search"
-      class="elevation-1"
-    >
-      <template v-slot:item.mapped="{ item }">
-        <v-icon v-if="item.raw.mapped" color="green" icon="mdi-check"></v-icon>
-        <v-icon v-else color="red" icon="mdi-close"></v-icon>
-      </template>
-      <template v-slot:item.synced="{ item }">
-        <v-icon v-if="item.raw.synced" color="green" icon="mdi-check"></v-icon>
-        <v-icon v-else color="red" icon="mdi-close"></v-icon>
-      </template>
-      <template v-slot:item.actions="{ item }">
-        <v-btn
-          color="primary"
-          title="Synchronize"
-          variant="tonal"
-          class="me-3"
-          size="small"
-          icon="mdi-sync"
-          :disabled="checkStatus(item.raw)"
-          @click="save(item.raw.id)"
-        ></v-btn>
-        <v-btn
-          color="primary"
-          title="Configure"
-          variant="tonal"
-          size="small"
-          icon="mdi-cog"
-          @click="dialogStore.setDialog('MappingDialog', item.raw)"
-        ></v-btn>
-      </template>
-      <template v-slot:expanded-row="{ columns, item }">
-        <tr>
-          <td :colspan="columns.length">
-            <v-table density="compact">
-              <tbody>
-                <!-- @ts-ignore -->
-                <tr v-for="(value, key) in item.raw.product" :key="key">
-                  <td>
-                    <strong>{{ key }}</strong>
-                  </td>
-                  <td>{{ value }}</td>
-                </tr>
-              </tbody>
-            </v-table>
-          </td>
-        </tr>
-      </template>
-    </v-data-table>
-  </v-card>
+  <div>
+    <v-text-field
+      prepend-inner-icon="mdi-magnify"
+      @click:prepend-inner="search"
+      @keydown.enter.prevent="search"
+      v-model="query"
+      variant="outlined"
+      name="name"
+      label="Search"
+    ></v-text-field>
+  </div>
+
+  <v-table v-if="!loading" class="elevation-1 mb-5">
+    <thead>
+      <tr>
+        <th v-for="header in headers" :key="header.key" class="text-left">{{ header.title }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr v-for="item in productStore.products" :key="item.id">
+        <td>
+          <v-btn
+            color="primary"
+            title="Synchronize"
+            variant="text"
+            class="me-3"
+            size="small"
+            icon="mdi-information"
+          ></v-btn
+          >{{ item.name }}
+        </td>
+        <td><span :title="dayjs(item.updatedDate)">{{ dayjs(item.updatedDate).fromNow() }}</span></td>
+        <td>
+          <v-btn
+            color="primary"
+            title="Synchronize"
+            variant="tonal"
+            class="me-3"
+            size="small"
+            icon="mdi-sync"
+          ></v-btn>
+          <v-btn
+            color="primary"
+            title="Configure"
+            variant="tonal"
+            size="small"
+            icon="mdi-cog"
+            @click="dialogStore.setDialog('MappingDialog', item)"
+          ></v-btn>
+        </td>
+      </tr>
+      <tr v-if="productStore.products.length === 0">
+        <td style="font-weight: bold">It looks like you don't have any products</td>
+      </tr>
+    </tbody>
+  </v-table>
+  <div style="display: flex">
+    <v-pagination
+      style="width: 80%"
+      v-model="page"
+      :length="Math.min(Math.ceil(productStore.total / limit), productStore.total)"
+      @update:model-value="refetch"
+    ></v-pagination>
+    <v-select
+      label="Total per page"
+      v-model="limit"
+      :items="[10, 20, 50, 100]"
+      variant="outlined"
+    ></v-select>
+  </div>
   <LoadingPage v-if="loading" />
 </template>

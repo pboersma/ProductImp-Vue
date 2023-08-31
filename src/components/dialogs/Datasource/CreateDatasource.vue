@@ -63,10 +63,11 @@ const submit = handleSubmit(onSuccess, onInvalidSubmit)
   <v-dialog v-model="dialogStore.isDialogOpen" persistent width="40%">
     <form @submit.prevent="submit">
       <v-card>
-        <template v-slot:title ><strong>Create a new datasource</strong></template>
+        <template v-slot:title><strong>Create a new datasource</strong></template>
         <v-card-text>
           <v-alert type="info" variant="outlined" closable style="margin: 1rem 0">
-            A datasource is a third-party connection to a supplier used for synchronizing new products to your store
+            A datasource is a third-party connection to a supplier used for synchronizing new
+            products to your store
           </v-alert>
           <v-alert
             v-if="errorsContainer.length > 0"

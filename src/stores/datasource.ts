@@ -1,7 +1,7 @@
 import { reactive, type Ref } from 'vue'
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getDatasources, deleteDatasource, createDatasource } from '@/services/DatasourceService'
+import { getDatasources, deleteDatasource, createDatasource, syncDatasource } from '@/services/DatasourceService'
 
 export const useDatasourceStore = defineStore('datasources', () => {
     const datasources: any = ref({})
@@ -40,10 +40,15 @@ export const useDatasourceStore = defineStore('datasources', () => {
         }
     }
 
+    const syncItem = async ( id: number ): Promise<any> => {
+        syncDatasource(id)
+    }
+
     return {
         datasources,
         fetchAll,
         createItem,
-        deleteItem
+        deleteItem,
+        syncItem
     }
 })

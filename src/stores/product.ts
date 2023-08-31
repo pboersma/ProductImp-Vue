@@ -1,31 +1,35 @@
-import { reactive, type Ref } from 'vue';
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getProducts } from '@/services/ProductService';
+import { getProducts } from '@/services/ProductService'
 
 export const useProductStore = defineStore('products', () => {
     const products: any = ref({})
+    const total: any = ref(1)
 
-    const fetchAll = async () => {
-        const response = await getProducts()
+    const fetchAll = async (page: number, limit: number, query: string) => {
+        try {
+            const { data } = await getProducts(page, limit, query)
 
-        products.value = response[0].map((item: any) => {
-            const product = JSON.parse(item.product);
+            products.value = data.items.map((item: any) => {
+                return {
+                    id: item.id,
+                    datasource: item.configuration,
+                    product: item.product,
+                    name: item.product.name,
+                    createdDate: item.createdDate,
+                    updatedDate: item.updatedDate,
+                }
+            })
 
-            return {
-                datasource: item.datasource_id,
-                id: item.id,
-                mapped: false,
-                mapping: [],
-                synced: false,
-                name: product.name,
-                product: product
-            }
-        })
+            total.value = data.total
+        } catch(error) {
+            console.error(error)
+        }
     }
 
     return {
         products,
+        total,
         fetchAll,
     }
 })

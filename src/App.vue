@@ -11,7 +11,7 @@ import DatasourcesPage from '@/components/pages/DatasourcesPage.vue'
 import ProductsPage from '@/components/pages/ProductsPage.vue'
 import LoadingPage from '@/components/pages/LoadingPage.vue'
 
-import MappingDialog from '@/components/dialogs/MappingDialog.vue'
+import MappingDialog from '@/components/dialogs/Mapping/MappingDialog.vue'
 import CreateDatasource from '@/components/dialogs/Datasource/CreateDatasource.vue'
 
 // Store
